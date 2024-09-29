@@ -25,6 +25,8 @@ fn connect(server: &String, major: u32, minor: u32) {
             match stream.read_exact(&mut header_buffer) {
                 Ok(_) => {
                     let mut header_reader = Reader::new(&header_buffer);
+                    
+                    println!("\nRECEIVED MESSAGE");
                     println!("----- HEADER -----");
                     let packet_id = header_reader.read_u16();
                     println!("Packet ID: {}", packet_id);
@@ -38,10 +40,6 @@ fn connect(server: &String, major: u32, minor: u32) {
                         Ok(_) => {
                             // println!("DEBUG: Received packet body: {:?} \n", &body_buffer);
 
-                            println!("\nRECEIVED MESSAGE");
-                            println!("----- PACKET IN HEX -----");
-                            println!("{} \n", to_hex(&body_buffer));
-
                             let mut reader = Reader::new(&body_buffer);
 
                             println!("----- PACKET -----");
@@ -51,6 +49,9 @@ fn connect(server: &String, major: u32, minor: u32) {
                             };
 
                             println!("Server Response: {}", server_response);
+
+                            println!("----- PACKET IN HEX -----");
+                            println!("{} \n", to_hex(&body_buffer));
                         }
                         Err(e) => {
                             eprintln!("Failed to read packet body: {}", e);
