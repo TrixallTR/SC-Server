@@ -9,14 +9,40 @@ mod stream {
     pub mod packet;
 }
 
-fn connect(server: &String, major: u32, minor: u32, build: u32) {
+fn main() {
+    let mut server = String::new();
+    let mut version = String::new();
+
+    print!("Server in 'SERVER:PORT' format (e.g. game.brawlstarsgame.com:9339): ");
+    io::stdout().flush().unwrap();
+    io::stdin()
+        .read_line(&mut server)
+        .expect("Failed to read input");
+    server = server.trim().to_string();
+
+    print!("Version in 'MAJOR.MINOR.BUILD' format (e.g. 57.325.1): ");
+    io::stdout().flush().unwrap();
+    io::stdin()
+        .read_line(&mut version)
+        .expect("Failed to read input");
+    version = version.trim().to_string();
+
+    connect(&server, parse_version(version));
+
+    let mut exit_input = String::new();
+    println!("\nPress Enter to exit...");
+    io::stdin().read_line(&mut exit_input).expect("Failed?");
+}
+
+
+fn connect(server: &String, version: Vec<u32>) {
     match TcpStream::connect(server) {
         Ok(mut stream) => {
             println!("Connected to: {} \n", server);
 
             let id = 10100;
             let mut packet = Packet::new();
-            let client_hello = packet.build(id, major, minor, build);
+            let client_hello = packet.build(id, version[0], version[1], version[2]);
             println!("SENDING Packet ID: {}", id);
 
             stream.write_all(&client_hello).expect("Failed to send packet");
@@ -71,60 +97,35 @@ fn connect(server: &String, major: u32, minor: u32, build: u32) {
     }
 }
 
-fn main() {
-    let mut server = String::new();
-    let mut version = String::new();
-
-    print!("Server in 'SERVER:PORT' format (e.g. game.brawlstarsgame.com:9339): ");
-    io::stdout().flush().unwrap();
-    io::stdin()
-        .read_line(&mut server)
-        .expect("Failed to read input");
-    server = server.trim().to_string();
-
-    print!("Version in 'MAJOR.MINOR.BUILD' format (e.g. 57.325.1): ");
-    io::stdout().flush().unwrap();
-    io::stdin()
-        .read_line(&mut version)
-        .expect("Failed to read input");
-    version = version.trim().to_string();
-
+fn parse_version(version: String) -> Vec<u32> {
     let split_version: Vec<&str> = version.split('.').collect();
 
     if split_version.len() != 3 {
-        println!("Version must be in 'MAJOR.MINOR.BUILD' format");
-        return;
+        panic!("Version must be in 'MAJOR.MINOR.BUILD' format");
     }
 
     let major: u32 = match split_version[0].parse() {
         Ok(num) => num,
         Err(_) => {
-            println!("Invalid major version");
-            return;
+            panic!("Invalid major version");
         }
     };
 
     let minor: u32 = match split_version[1].parse() {
         Ok(num) => num,
         Err(_) => {
-            println!("Invalid minor version");
-            return;
+            panic!("Invalid minor version");
         }
     };
 
     let build: u32 = match split_version[2].parse() {
         Ok(num) => num,
         Err(_) => {
-            println!("Invalid build version");
-            return;
+            panic!("Invalid build version");
         }
     };
 
-    connect(&server, major, minor, build);
-
-    let mut exit_input = String::new();
-    println!("\nPress Enter to exit...");
-    io::stdin().read_line(&mut exit_input).expect("Failed?");
+    return vec![major, minor, build];
 }
 
 fn to_hex(data: &[u8]) -> String {
