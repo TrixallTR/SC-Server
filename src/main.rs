@@ -82,7 +82,7 @@ fn main() {
         .expect("Failed to read input");
     server = server.trim().to_string();
 
-    print!("Version in 'MAJOR.MINOR' format (e.g. 42.263): ");
+    print!("Version in 'MAJOR.MINOR' format (e.g. 57.325): ");
     io::stdout().flush().unwrap();
     io::stdin()
         .read_line(&mut version)
