@@ -9,14 +9,14 @@ mod stream {
     pub mod packet;
 }
 
-fn connect(server: &String, major: u32, minor: u32) {
+fn connect(server: &String, major: u32, minor: u32, build: u32) {
     match TcpStream::connect(server) {
         Ok(mut stream) => {
             println!("Connected to: {} \n", server);
 
             let id = 10100;
             let mut packet = Packet::new();
-            let client_hello = packet.build(id, major, minor);
+            let client_hello = packet.build(id, major, minor, build);
             println!("SENDING Packet ID: {}", id);
 
             stream.write_all(&client_hello).expect("Failed to send packet");
@@ -82,7 +82,7 @@ fn main() {
         .expect("Failed to read input");
     server = server.trim().to_string();
 
-    print!("Version in 'MAJOR.MINOR' format (e.g. 57.325): ");
+    print!("Version in 'MAJOR.MINOR.BUILD' format (e.g. 57.325.1): ");
     io::stdout().flush().unwrap();
     io::stdin()
         .read_line(&mut version)
@@ -91,8 +91,8 @@ fn main() {
 
     let split_version: Vec<&str> = version.split('.').collect();
 
-    if split_version.len() != 2 {
-        println!("Version must be in 'MAJOR.MINOR' format");
+    if split_version.len() != 3 {
+        println!("Version must be in 'MAJOR.MINOR.BUILD' format");
         return;
     }
 
@@ -112,7 +112,15 @@ fn main() {
         }
     };
 
-    connect(&server, major, minor);
+    let build: u32 = match split_version[2].parse() {
+        Ok(num) => num,
+        Err(_) => {
+            println!("Invalid build version");
+            return;
+        }
+    };
+
+    connect(&server, major, minor, build);
 
     let mut exit_input = String::new();
     println!("\nPress Enter to exit...");

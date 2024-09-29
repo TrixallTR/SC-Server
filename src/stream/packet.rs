@@ -19,19 +19,19 @@ impl Packet {
         self.header.write_u16(0);
     }
 
-    pub fn write_packet(&mut self, major: u32, minor: u32) {
+    pub fn write_packet(&mut self, major: u32, minor: u32, build: u32) {
         self.packet.write_u32(0);
         self.packet.write_u32(0);
         self.packet.write_u32(major);
-        self.packet.write_u32(0);
+        self.packet.write_u32(build);
         self.packet.write_u32(minor);
         self.packet.write_string("");
         self.packet.write_u32(2);
         self.packet.write_u32(2);
     }
 
-    pub fn build(&mut self, id: u16, major: u32, minor: u32) -> Vec<u8> {
-        self.write_packet(major, minor);
+    pub fn build(&mut self, id: u16, major: u32, minor: u32, build: u32) -> Vec<u8> {
+        self.write_packet(major, minor, build);
         self.write_header(id);
         let mut complete_packet = self.header.stream.clone();
         complete_packet.extend(&self.packet.stream);
