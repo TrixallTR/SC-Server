@@ -31,7 +31,7 @@ fn main() {
 
     let mut exit_input = String::new();
     println!("\nPress Enter to exit...");
-    io::stdin().read_line(&mut exit_input).expect("Failed?");
+    io::stdin().read_line(&mut exit_input).unwrap();
 }
 
 
@@ -89,7 +89,7 @@ fn connect(server: &String, version: Vec<u32>) {
                 }
             }
 
-            stream.shutdown(Shutdown::Both).expect("Failed to shut down the connection")
+            stream.shutdown(Shutdown::Both).unwrap();
         },
         Err(e) => {
             println!("Couldn't connect to server: {}", e);
@@ -104,26 +104,9 @@ fn parse_version(version: String) -> Vec<u32> {
         panic!("Version must be in 'MAJOR.MINOR.BUILD' format");
     }
 
-    let major: u32 = match split_version[0].parse() {
-        Ok(num) => num,
-        Err(_) => {
-            panic!("Invalid major version");
-        }
-    };
-
-    let minor: u32 = match split_version[1].parse() {
-        Ok(num) => num,
-        Err(_) => {
-            panic!("Invalid minor version");
-        }
-    };
-
-    let build: u32 = match split_version[2].parse() {
-        Ok(num) => num,
-        Err(_) => {
-            panic!("Invalid build version");
-        }
-    };
+    let major: u32 = split_version[0].parse().expect("Invalid major");
+    let minor: u32 = split_version[1].parse().expect("Invalid minor");
+    let build: u32 = split_version[2].parse().expect("Invalid build");
 
     return vec![major, minor, build];
 }
