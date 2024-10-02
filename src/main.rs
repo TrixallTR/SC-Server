@@ -92,7 +92,7 @@ fn connect(server: &String, version: Vec<u32>) {
             stream.shutdown(Shutdown::Both).unwrap();
         },
         Err(e) => {
-            println!("Couldn't connect to server: {}", e);
+            eprintln!("Couldn't connect to server: {}", e);
         }
     }
 }
@@ -101,7 +101,8 @@ fn parse_version(version: String) -> Vec<u32> {
     let split_version: Vec<&str> = version.split('.').collect();
 
     if split_version.len() != 3 {
-        panic!("Version must be in 'MAJOR.MINOR.BUILD' format");
+        eprintln!("Version must be in 'MAJOR.MINOR.BUILD' format");
+        main();
     }
 
     let major: u32 = split_version[0].parse().expect("Invalid major");
