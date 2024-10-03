@@ -79,7 +79,7 @@ impl Reader {
     }
 
     pub fn length(&self) -> usize {
-        return self.stream.len();
+        self.stream.len()
     }
 
     pub fn display(&self) {
