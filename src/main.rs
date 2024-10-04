@@ -10,8 +10,8 @@ mod stream {
 }
 
 fn main() {
-    let config = get_config();
-    connect(&config.0, config.1);
+    let (server, version) = get_config();
+    connect(&server, version);
 
     let mut exit_input = String::new();
     println!("\nPress Enter to exit...");
