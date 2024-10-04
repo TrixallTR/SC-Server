@@ -3,8 +3,8 @@ pub struct Writer {
 }
 
 impl Writer {
-    pub fn new() -> Writer {
-        Writer {
+    pub fn new() -> Self {
+        Self {
             stream: Vec::new()
         }
     }

@@ -6,8 +6,8 @@ pub struct Packet {
 }
 
 impl Packet {
-    pub fn new() -> Packet {
-        Packet {
+    pub fn new() -> Self {
+        Self {
             header: Writer::new(),
             packet: Writer::new()
         }
