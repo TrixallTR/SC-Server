@@ -20,7 +20,7 @@ fn main() {
         .expect("Failed to read input");
     server = server.trim().to_string();
 
-    print!("Version in 'MAJOR.MINOR.BUILD' format (e.g. 57.325.1): ");
+    print!("Version in 'MAJOR.MINOR[.BUILD]' format (e.g. 57.325 or 57.325.1): ");
     io::stdout().flush().unwrap();
     io::stdin()
         .read_line(&mut version)
@@ -100,14 +100,14 @@ fn connect(server: &String, version: Vec<u32>) {
 fn parse_version(version: String) -> Vec<u32> {
     let split_version: Vec<&str> = version.split('.').collect();
 
-    if split_version.len() != 3 {
-        eprintln!("Version must be in 'MAJOR.MINOR.BUILD' format");
+    if split_version.len() < 2 {
+        eprintln!("Version must be in 'MAJOR.MINOR.BUILD' OR 'MAJOR.MINOR' format");
         main();
     }
 
     let major: u32 = split_version[0].parse().expect("Invalid major");
     let minor: u32 = split_version[1].parse().expect("Invalid minor");
-    let build: u32 = split_version[2].parse().expect("Invalid build");
+    let build: u32 = if split_version.len() == 3 { split_version[2].parse().expect("Invalid build") } else { 1 };
 
     return vec![major, minor, build];
 }
