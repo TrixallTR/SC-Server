@@ -10,30 +10,13 @@ mod stream {
 }
 
 fn main() {
-    let mut server = String::new();
-    let mut version = String::new();
-
-    print!("Server in 'SERVER:PORT' format (e.g. game.brawlstarsgame.com:9339): ");
-    io::stdout().flush().unwrap();
-    io::stdin()
-        .read_line(&mut server)
-        .expect("Failed to read input");
-    server = server.trim().to_string();
-
-    print!("Version in 'MAJOR.MINOR[.BUILD]' format (e.g. 57.325 or 57.325.1): ");
-    io::stdout().flush().unwrap();
-    io::stdin()
-        .read_line(&mut version)
-        .expect("Failed to read input");
-    version = version.trim().to_string();
-
-    connect(&server, parse_version(version));
+    let config = get_config();
+    connect(&config.0, config.1);
 
     let mut exit_input = String::new();
     println!("\nPress Enter to exit...");
     io::stdin().read_line(&mut exit_input).unwrap();
 }
-
 
 fn connect(server: &String, version: Vec<u32>) {
     match TcpStream::connect(server) {
@@ -97,19 +80,40 @@ fn connect(server: &String, version: Vec<u32>) {
     }
 }
 
-fn parse_version(version: String) -> Vec<u32> {
-    let split_version: Vec<&str> = version.split('.').collect();
+fn get_config() -> (String, Vec<u32>) {
+    loop {
+        let mut server = String::new();
+        let mut version = String::new();
 
-    if split_version.len() < 2 {
-        eprintln!("Version must be in 'MAJOR.MINOR.BUILD' OR 'MAJOR.MINOR' format");
-        main();
+        print!("Server in 'SERVER:PORT' format (e.g. game.brawlstarsgame.com:9339): ");
+        io::stdout().flush().unwrap();
+        io::stdin().read_line(&mut server).unwrap();
+        server = server.trim().to_string();
+
+        print!("Version in 'MAJOR.MINOR[.BUILD]' format (e.g. 57.325 or 57.325.1): ");
+        io::stdout().flush().unwrap();
+        io::stdin().read_line(&mut version).unwrap();
+        version = version.trim().to_string();
+
+        let split_server: Vec<&str> = server.split(':').collect();
+        let split_version: Vec<&str> = version.split('.').collect();
+
+        if split_server.len() == 2 {
+            if split_version.len() >= 2 {
+                let major = split_version[0].parse().expect("Invalid major");
+                let minor = split_version[1].parse().expect("Invalid minor");
+                let build = if split_version.len() == 3 { split_version[2].parse().expect("Invalid build") } else { 1 };
+
+                return (server, vec![major, minor, build]);
+            } 
+            else {
+                eprintln!("Version must be in 'MAJOR.MINOR.BUILD' OR 'MAJOR.MINOR' format");
+            }
+        } 
+        else {
+            eprintln!("Server must be in 'SERVER:PORT' format");
+        }
     }
-
-    let major: u32 = split_version[0].parse().expect("Invalid major");
-    let minor: u32 = split_version[1].parse().expect("Invalid minor");
-    let build: u32 = if split_version.len() == 3 { split_version[2].parse().expect("Invalid build") } else { 1 };
-
-    return vec![major, minor, build];
 }
 
 fn to_hex(data: &[u8]) -> String {
