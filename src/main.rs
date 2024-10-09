@@ -13,8 +13,8 @@ fn main() {
     let (server, version) = get_config();
     connect(&server, version);
 
-    let mut exit_input = String::new();
     println!("\nPress Enter to exit...");
+    let mut exit_input = String::new();
     io::stdin().read_line(&mut exit_input).unwrap();
 }
 
