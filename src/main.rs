@@ -10,15 +10,15 @@ mod stream {
 }
 
 fn main() {
-    let (server, version) = get_config();
-    connect(&server, version);
+    let (server, version, save) = get_config();
+    connect(&server, version, save);
 
     println!("\nPress Enter to exit...");
     let mut exit_input = String::new();
     io::stdin().read_line(&mut exit_input).unwrap();
 }
 
-fn connect(server: &String, version: Vec<u32>) {
+fn connect(server: &String, version: Vec<u32>, save: bool) {
     match TcpStream::connect(server) {
         Ok(mut stream) => {
             println!("Connected to: {} \n", server);
@@ -61,6 +61,14 @@ fn connect(server: &String, version: Vec<u32>) {
 
                             println!("----- PACKET IN HEX -----");
                             println!("{} \n", to_hex(&body_buffer));
+
+                            if save {
+                                let file_name = format!("packet_{}.bin", packet_id);
+                                let mut full_packet = header_buffer.to_vec();
+                                full_packet.extend_from_slice(&body_buffer);
+                                std::fs::write(&file_name, &full_packet).expect("Failed to save packet to file");
+                                println!("Packet saved to: {}", file_name);
+                            }
                         }
                         Err(e) => {
                             eprintln!("Failed to read packet body: {}", e);
@@ -80,10 +88,11 @@ fn connect(server: &String, version: Vec<u32>) {
     }
 }
 
-fn get_config() -> (String, Vec<u32>) {
+fn get_config() -> (String, Vec<u32>, bool) {
     loop {
         let mut server = String::new();
         let mut version = String::new();
+        let mut save = String::new();
 
         print!("Server in 'SERVER:PORT' format (e.g. game.brawlstarsgame.com:9339): ");
         io::stdout().flush().unwrap();
@@ -95,16 +104,22 @@ fn get_config() -> (String, Vec<u32>) {
         io::stdin().read_line(&mut version).unwrap();
         version = version.trim().to_string();
 
+        print!("Save Packet To File? (Y/N): ");
+        io::stdout().flush().unwrap();
+        io::stdin().read_line(&mut save).unwrap();
+        save = save.trim().to_string();
+
         let split_server: Vec<&str> = server.split(':').collect();
         let split_version: Vec<&str> = version.split('.').collect();
 
         if split_server.len() == 2 {
             if split_version.len() >= 2 {
+                let save = if save.to_uppercase() == "Y" { true } else { false };
                 let major = split_version[0].parse().expect("Invalid major");
                 let minor = split_version[1].parse().expect("Invalid minor");
                 let build = if split_version.len() == 3 { split_version[2].parse().expect("Invalid build") } else { 1 };
 
-                return (server, vec![major, minor, build]);
+                return (server, vec![major, minor, build], save);
             } 
             else {
                 eprintln!("Version must be in 'MAJOR.MINOR.BUILD' OR 'MAJOR.MINOR' format");
