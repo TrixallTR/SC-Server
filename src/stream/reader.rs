@@ -1,12 +1,12 @@
-pub struct Reader {
-    pub stream: Vec<u8>,
+pub struct Reader<'a> {
+    pub stream: &'a [u8],
     pub cursor: usize
 }
 
-impl Reader {
-    pub fn new(data: &[u8]) -> Self {
+impl<'a> Reader<'a> {
+    pub fn new(data: &'a[u8]) -> Self {
         Self {
-            stream: data.to_vec(),
+            stream: data,
             cursor: 0
         }
     }
